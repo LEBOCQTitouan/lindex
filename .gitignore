@@ -1,0 +1,19 @@
+# Rust
+/target
+**/*.rs.bk
+
+# Node / Next.js
+node_modules/
+app/.next/
+app/out/
+app/next-env.d.ts
+
+# Env & secrets
+.env
+.env.local
+
+# OS
+.DS_Store
+
+# Conductor
+.context/

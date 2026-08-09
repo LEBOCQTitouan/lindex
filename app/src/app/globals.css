@@ -1,0 +1,82 @@
+/* Design tokens ported from the mockups (mockups/*.html). */
+:root {
+  --ink: #1b1e26;
+  --muted: #6c707a;
+  --paper: #f1f1ec;
+  --card: #fff;
+  --rule: #dad9d2;
+  --accent: #294270;
+  --serif: ui-serif, Georgia, "Times New Roman", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: var(--accent);
+}
+h1 {
+  font-family: var(--serif);
+  letter-spacing: -0.01em;
+}
+.wrap {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 24px 18px 64px;
+}
+.mono {
+  font-family: var(--mono);
+}
+.muted {
+  color: var(--muted);
+}
+.hemi {
+  margin: 16px 0;
+}
+.hemi svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.hemi-toggle {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.hemi-toggle button {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 5px 12px;
+  background: var(--card);
+  border: 0;
+  cursor: pointer;
+  color: var(--muted);
+}
+.hemi-toggle button + button {
+  border-left: 1px solid var(--rule);
+}
+.hemi-toggle button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

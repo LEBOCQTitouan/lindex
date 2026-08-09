@@ -1,0 +1,25 @@
+# L'Index — Rust data plane (the hexagon). Dependencies point inward:
+#   domain  ←  application  ←  adapters  ←  bin (composition roots)
+[workspace]
+resolver = "2"
+members = [
+  "crates/domain",
+  "crates/application",
+  "crates/adapters-persistence",
+  "crates/adapters-sources",
+  "bin/ingest",
+]
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.80"
+
+[workspace.dependencies]
+thiserror = "2"
+anyhow = "1"
+async-trait = "0.1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "json", "chrono", "uuid"] }
+reqwest = { version = "0.12", features = ["json"] }
+serde_json = "1"
+chrono = { version = "0.4", features = ["clock"] }

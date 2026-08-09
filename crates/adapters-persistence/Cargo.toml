@@ -1,0 +1,12 @@
+[package]
+name = "lindex-adapters-persistence"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+
+# Driven adapter: PostgreSQL via sqlx. Implements the application's storage ports.
+[dependencies]
+lindex-domain = { path = "../domain" }
+lindex-application = { path = "../application" }
+async-trait.workspace = true
+sqlx.workspace = true

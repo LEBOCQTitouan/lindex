@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'Index — C · Le tableau de bord</title>
+<style>
+:root{
+  --ink:#1B1E26; --ink-soft:#3A3E48; --muted:#6C707A;
+  --paper:#EDEDE8; --card:#FFFFFF; --rule:#DAD9D2; --rule-soft:#E7E6E0;
+  --accent:#294270; --accent-soft:#E7ECF3;
+  --adopte:#3C6E58; --rejete:#9B4B3B; --reporte:#8A7635; --info:#5A5E68;
+  --pour:#3C6E58; --contre:#9B4B3B; --abst:#8A7635; --nv:#B9B8B1;
+  --live:#9B4B3B;
+  --serif:ui-serif,Georgia,"Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3{margin:0;font-weight:600;line-height:1.16}
+
+/* ============ shared atoms (identical across the 4 variants) ============ */
+.tag{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;text-transform:uppercase;padding:2px 6px;border-radius:999px;border:1px solid var(--rule);color:var(--muted);background:var(--card);white-space:nowrap}
+.tag--chamber{color:var(--ink);border-color:var(--ink)}
+.tag--chamber[data-ch="SENAT"]{color:var(--accent);border-color:var(--accent)}
+.tag--chamber[data-ch="EXEC"]{color:#7A5A2A;border-color:#7A5A2A}
+.tag--theme{border-style:dashed}
+.tag--illus{color:#7A5A2A;border-color:#B98E3A;background:#FBF3E2;border-style:dotted}
+.chip{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:5px;border:1px solid currentColor}
+.chip--adopte{color:var(--adopte);background:rgba(60,110,88,.08)}
+.chip--rejete{color:var(--rejete);background:rgba(155,75,59,.08)}
+.chip--reporte{color:var(--reporte);background:rgba(138,118,53,.08)}
+.chip--info{color:var(--info);background:rgba(90,94,104,.08)}
+.prov{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;color:var(--muted);text-decoration:none}
+.prov__dot{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--accent);color:#fff;font-size:9.5px;font-weight:700;flex:none}
+.prov__label{border-bottom:1px solid var(--rule)}
+a.prov:hover .prov__label{border-color:var(--accent);color:var(--ink)}
+.stat{display:inline-flex;flex-direction:column;line-height:1.12;vertical-align:middle}
+.stat__val{font-family:var(--mono);font-weight:700}
+.stat__unit{font-weight:400;margin-left:2px;color:var(--muted)}
+.stat__base{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.part{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 12px;margin:8px 0 2px}
+.part__gap{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.meter__bar{display:flex;height:10px;border-radius:5px;overflow:hidden;border:1px solid var(--rule);background:#fff}
+.seg{display:block}
+.seg.v-pour{background:var(--pour)}.seg.v-contre{background:var(--contre)}.seg.v-abst{background:var(--abst)}.seg.v-nv{background:var(--nv)}
+.seg.v-absent{background:repeating-linear-gradient(45deg,#E7E6DE,#E7E6DE 3px,#fff 3px,#fff 6px)}
+.meter__legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:5px;font-size:11.5px;color:var(--muted)}
+.meter__legend b{font-family:var(--mono);color:var(--ink)}
+.meter__legend .is-ghost b{color:var(--muted)}
+.hemi-wrap{width:100%}
+.hemi{display:block;width:100%;height:auto}
+.seat{transition:fill .18s ease}
+.hemi--vote .seat[data-vote="pour"]{fill:var(--pour)}
+.hemi--vote .seat[data-vote="contre"]{fill:var(--contre)}
+.hemi--vote .seat[data-vote="abst"]{fill:var(--abst)}
+.hemi--vote .seat[data-vote="nv"]{fill:var(--nv)}
+.hemi--groupes .seat:not([data-vote="absent"]){fill:var(--gc)}
+.seat[data-vote="absent"]{fill:#fff;stroke:var(--nv);stroke-width:1;opacity:.5}
+.hemi-legend .lg-set{display:flex;flex-wrap:wrap;gap:5px 11px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.hemi-legend .lg{display:inline-flex;align-items:center;gap:5px}
+.hemi-legend .sw{width:9px;height:9px;border-radius:50%;display:inline-block}
+.hemi-legend .sw.v-pour{background:var(--pour)}.hemi-legend .sw.v-contre{background:var(--contre)}
+.hemi-legend .sw.v-abst{background:var(--abst)}.hemi-legend .sw.v-nv{background:var(--nv)}
+.hemi-legend .sw.v-absent{background:#fff;border:1px solid var(--nv)}
+.hemi-scope .lg-grp{display:none}
+.hemi-scope.show-grp .lg-vote{display:none}
+.hemi-scope.show-grp .lg-grp{display:flex}
+.hemi-toggle{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.hemi-toggle button{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;padding:4px 10px;background:var(--card);border:0;cursor:pointer;color:var(--muted)}
+.hemi-toggle button+button{border-left:1px solid var(--rule)}
+.hemi-toggle button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.tl__bar{display:flex;height:16px;border-radius:4px;overflow:hidden;border:1px solid var(--rule)}
+.tl--debate{background:var(--accent);opacity:.85}
+.tl--susp{background:repeating-linear-gradient(45deg,#C9B686,#C9B686 3px,#E7DFCB 3px,#E7DFCB 6px)}
+.tl__legend{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px;font-size:11.5px;color:var(--muted)}
+.tl__k{display:inline-block;width:12px;height:10px;border-radius:2px;vertical-align:middle}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ============ variant C: the dashboard ============ */
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px 56px}
+.topbar{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;padding:16px 2px 12px}
+.topbar h1{font-size:20px;letter-spacing:-.01em;display:flex;align-items:baseline;gap:10px}
+.topbar .variant{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 6px}
+.topbar .clock{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.live{background:var(--ink);color:#F1F1EC;border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.live__head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:9px}
+.live__badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#F1D3CB}
+.live__pulse{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 rgba(155,75,59,.7);animation:pulse 1.8s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 7px rgba(155,75,59,0)}100%{box-shadow:0 0 0 0 rgba(155,75,59,0)}}
+.live__illus{margin-left:auto}
+.live__title{font-family:var(--serif);font-size:17px}
+.live__item{font-size:13.5px;color:#CDCEC9}
+.live__bar{display:flex;height:14px;border-radius:4px;overflow:hidden;border:1px solid #3A3E48;margin-top:10px}
+.live__seg-d{background:#5C79A8}.live__seg-s{background:repeating-linear-gradient(45deg,#8A7635,#8A7635 3px,#5b4f24 3px,#5b4f24 6px)}
+.live__meta{display:flex;flex-wrap:wrap;gap:14px;margin-top:9px;font-family:var(--mono);font-size:11.5px;color:#CDCEC9}
+.live__meta b{color:#fff}
+.live a.prov{color:#CDCEC9}.live a.prov .prov__label{border-color:#4A4E58}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.w{grid-column:span 12;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:14px 16px 15px}
+.w--6{grid-column:span 6}.w--4{grid-column:span 4}.w--8{grid-column:span 8}
+@media(max-width:860px){.w--6,.w--4,.w--8{grid-column:span 12}}
+.w__h{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--rule);padding-bottom:9px;margin-bottom:12px}
+.w__h .n{color:var(--accent);font-weight:700}
+.phare{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:center}
+@media(max-width:720px){.phare{grid-template-columns:1fr}}
+.phare h3{font-family:var(--serif);font-size:19px;letter-spacing:-.01em;margin-bottom:6px}
+.phare__ctr{display:flex;flex-direction:column;gap:8px}
+.phare__toolbar{display:flex;justify-content:flex-end}
+.hemi-scope .hemi-legend{margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.pchip{border:1px solid var(--rule);border-radius:8px;padding:7px 10px;min-width:118px;background:#FBFBF9}
+.pchip .lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.pchip .v{font-family:var(--mono);font-weight:700;font-size:17px;margin-top:2px}
+.pchip .b{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.pchip--hot .v{color:var(--rejete)}
+.night{font-family:var(--mono);font-size:11px;color:#7A5A2A;margin-top:10px}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-bottom:1px solid var(--rule-soft)}
+.row:last-child{border-bottom:0}
+.row__t{font-size:13.5px;font-weight:600}
+.row__s{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+.row__next{font-size:12px;color:var(--accent);margin-top:3px}
+.row__r{text-align:right;white-space:nowrap}
+.gauge{display:flex;align-items:center;gap:12px;margin-top:6px}
+.gauge__big{font-family:var(--mono);font-weight:700;font-size:30px;line-height:1}
+.gauge__big small{font-size:15px;color:var(--muted)}
+.gauge__bar{flex:1}
+.gbar{height:9px;border-radius:5px;background:var(--rule-soft);overflow:hidden;border:1px solid var(--rule)}
+.gbar>span{display:block;height:100%;background:#7A5A2A}
+.gauge__note{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px}
+.evt{display:grid;grid-template-columns:78px 60px 1fr auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--rule-soft)}
+.evt:last-child{border-bottom:0}
+.evt__time{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.evt__ttl{font-size:13.5px;font-weight:600;line-height:1.3}
+.evt__sub{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:2px}
+.evt__meter{width:130px}
+@media(max-width:560px){.evt{grid-template-columns:70px 1fr}.evt__ch,.evt__meter{display:none}}
+.foot{margin-top:12px;padding-top:9px;border-top:1px solid var(--rule-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.cap{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.backlink{display:inline-block;margin-top:22px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <h1>L'Index <span class="variant">C · Tableau de bord</span></h1>
+    <div class="clock" id="clock"></div>
+  </div>
+
+  <section class="live" id="live"></section>
+
+  <div class="grid">
+    <section class="w w--8" id="phare"></section>
+    <section class="w w--4" id="decrets"></section>
+    <section class="w w--12" id="seance"></section>
+    <section class="w w--6" id="navette"></section>
+    <section class="w w--6" id="attendus"></section>
+    <section class="w w--12" id="events"></section>
+  </div>
+  <a class="backlink" href="index.html">← Comparer les variantes</a>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  var D = window.LINDEX.data, ui = window.LINDEX.ui, fmt = window.LINDEX.fmt;
+  document.getElementById('clock').textContent = "État au " + D.edition.updatedLabel + " · " + D.edition.coversLabel;
+
+  // ---- Live strip (Parliament sits) ----
+  var ls = D.liveSession, dmin = ls.elapsedMinutes - ls.suspensionMinutes;
+  document.getElementById('live').innerHTML =
+    '<div class="live__head"><span class="live__badge"><span class="live__pulse"></span>Séance en direct</span>' +
+      ui.chamberTag(ls.chamber) + (ls.illustrative ? '<span class="live__illus">'+ui.illusTag()+'</span>' : '') + '</div>' +
+    '<div class="live__title">' + ui.escape(ls.title) + "</div>" +
+    '<div class="live__item">' + ui.escape(ls.currentItem) + "</div>" +
+    '<div class="live__bar"><span class="live__seg-d" style="flex:' + dmin + '"></span>' +
+      '<span class="live__seg-s" style="flex:' + ls.suspensionMinutes + '"></span></div>' +
+    '<div class="live__meta">' +
+      '<span>Depuis <b>' + ls.startedLabel + "</b></span>" +
+      '<span>Débat effectif <b>' + dmin + " min</b></span>" +
+      '<span>Suspensions <b>' + ls.suspensionMinutes + " min</b></span>" +
+      '<span>Rappels au règlement <b>' + ls.rappels + "</b> (médiane " + ls.rappelsMedian + ")</span>" +
+      ui.provenance(ls.source) + "</div>";
+
+  // ---- Scrutin phare: dot hémicycle + toggle + participation ----
+  var lead = D.events.filter(function(e){return e.isLead;})[0], v = lead.vote;
+  document.getElementById('phare').innerHTML =
+    '<div class="w__h"><span>Scrutin phare — ' + D.edition.coversLabel + '</span><span class="n">n° ' + v.scrutinNo + '</span></div>' +
+    '<div class="phare"><div>' +
+      '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px">' + ui.chamberTag(lead.chamber) + ui.themeTag(lead.theme) + ui.outcomeChip(lead.outcome, lead.outcomeLabel) + '</div>' +
+      '<h3>' + ui.escape(lead.title) + '</h3>' +
+      ui.participation(v) + ui.voteMeter(v) +
+      '<div class="foot">' + ui.provenance(lead.source) + '<span class="cap">marge +' + (v.pour - v.contre) + '</span></div>' +
+    '</div>' +
+    '<div class="phare__ctr hemi-scope" id="phareScope">' +
+      '<div class="phare__toolbar"><span class="hemi-toggle">' +
+        '<button data-hemi-toggle="vote" aria-pressed="true">Vote</button>' +
+        '<button data-hemi-toggle="groupes" aria-pressed="false">Groupes</button></span></div>' +
+      ui.hemicycleDots(v,{width:290,dot:2.8}) + ui.hemicycleLegends(v) +
+    '</div></div>';
+  ui.bindHemiToggle(document.getElementById('phareScope'));
+
+  // ---- Décrets (executive symmetry) — illustrative ----
+  var dc = D.systemState.decretsRetard;
+  document.getElementById('decrets').innerHTML =
+    '<div class="w__h"><span>Application des lois</span>' + (dc.illustrative ? ui.illusTag() : '<span class="n">côté exécutif</span>') + '</div>' +
+    '<div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px">' + ui.escape(dc.law) + '</div>' +
+    '<div class="gauge"><div class="gauge__big">' + dc.published + '<small>/' + dc.expected + '</small></div>' +
+      '<div class="gauge__bar"><div class="gbar"><span style="width:' + fmt.pct(dc.published,dc.expected) + '%"></span></div>' +
+      '<div class="cap" style="margin-top:6px">décrets d\'application publiés</div></div></div>' +
+    '<div class="gauge__note">Délai écoulé : ' + dc.monthsElapsed + ' mois — médiane pour ce type de loi : ' + dc.monthsMedian + ' mois.</div>';
+
+  // ---- Séance procedural footprint — illustrative ----
+  var s = D.seances["an-ordre-public"];
+  function pchip(lbl, val, base, hot){
+    return '<div class="pchip ' + (hot?'pchip--hot':'') + '"><div class="lbl">' + lbl +
+      '</div><div class="v">' + val + '</div><div class="b">' + base + "</div></div>";
+  }
+  document.getElementById('seance').innerHTML =
+    '<div class="w__h"><span>Empreinte de séance — ' + ui.escape(s.label) + '</span>' +
+      (s.illustrative ? ui.illusTag() : '<span class="n">' + fmt.pct(s.suspensionMinutes,s.wallMinutes) + '% en suspension</span>') + '</div>' +
+    '<div style="font-size:13px;color:var(--ink-soft);margin-bottom:10px">' + ui.escape(s.dossier) +
+      ' · ' + s.startedLabel + ' → ' + s.endedLabel + '</div>' +
+    ui.seanceBar(s) +
+    '<div class="chips">' +
+      pchip('Suspensions', s.suspensions.length + ' × ', 'total ' + s.suspensionMinutes + ' min', true) +
+      pchip('Part suspendue', fmt.pct(s.suspensionMinutes,s.wallMinutes)+' %', 'médiane : ' + s.suspensionMedianPct + ' %', true) +
+      pchip('Rappels règlement', s.rappels, 'médiane : ' + s.rappelsMedian) +
+      pchip('Scrutins demandés', s.scrutinsDemandes, 'médiane : ' + s.scrutinsDemandesMedian) +
+      pchip('Motions', s.motions, 'rejet préalable') +
+    '</div>' +
+    '<div class="night">● Séance de nuit — levée à ' + s.endedLabel + '</div>' +
+    '<div class="foot">' + ui.provenance(s.source) +
+      '<span class="cap">Indicateurs symétriques — minorité & majorité</span></div>';
+
+  // ---- Textes en navette ----
+  document.getElementById('navette').innerHTML =
+    '<div class="w__h"><span>Textes en navette</span><span class="n">' + D.systemState.navette.length + '</span></div>' +
+    D.systemState.navette.map(function(n){
+      return '<div class="row"><div><div class="row__t">' + ui.escape(n.title) + '</div>' +
+        '<div class="row__s">' + ui.escape(n.step) + '</div>' +
+        '<div class="row__next">Prochaine étape : ' + ui.escape(n.next) + '</div></div>' +
+        '<div class="row__r">' + ui.chamberTag(n.chamberNext) + '</div></div>';
+    }).join("");
+
+  // ---- Votes attendus ----
+  document.getElementById('attendus').innerHTML =
+    '<div class="w__h"><span>Votes attendus</span><span class="n">' + D.systemState.votesAttendus.length + '</span></div>' +
+    D.systemState.votesAttendus.map(function(vv){
+      return '<div class="row"><div><div class="row__t">' + ui.escape(vv.what) + '</div>' +
+        '<div class="row__s">' + (vv.kind==='solennel'?'scrutin solennel':'scrutin') + '</div></div>' +
+        '<div class="row__r">' + ui.chamberTag(vv.chamber) +
+        '<div class="row__s" style="margin-top:4px">' + ui.escape(vv.when) + '</div></div></div>';
+    }).join("");
+
+  // ---- Event grid ----
+  var evs = D.events.filter(function(e){return e.chamber!=='EXEC';}).slice().sort(function(a,b){return a.sortKey-b.sortKey;});
+  document.getElementById('events').innerHTML =
+    '<div class="w__h"><span>Journée du ' + D.edition.coversLabel + '</span><span class="n">' + evs.length + ' scrutins</span></div>' +
+    evs.map(function(e){
+      var meter = e.vote ? '<div class="evt__meter">' + ui.voteMeter(e.vote) + '</div>' : '<div class="evt__meter"></div>';
+      return '<div class="evt"><div class="evt__time">' + ui.escape(e.timeLabel) + '</div>' +
+        '<div class="evt__ch">' + ui.chamberTag(e.chamber) + '</div>' +
+        '<div><div class="evt__ttl">' + ui.escape(e.title) + '</div>' +
+        '<div class="evt__sub">' + ui.escape(e.type) + ' · ' + fmt.theme(e.theme) + '</div></div>' +
+        '<div class="row__r">' + ui.outcomeChip(e.outcome, e.outcomeLabel) + meter + '</div></div>';
+    }).join("");
+})();
+</script>
+</body>
+</html>

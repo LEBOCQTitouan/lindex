@@ -1,0 +1,10 @@
+[package]
+name = "lindex-domain"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+
+# Pure model. No I/O, no framework, no outward dependencies.
+[dependencies]
+thiserror.workspace = true
+chrono.workspace = true

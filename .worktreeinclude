@@ -1,0 +1,14 @@
+# Files to copy into new git/Conductor worktrees (gitignore syntax).
+# Only gitignored files matching these patterns are copied; tracked files are
+# never duplicated (git already carries those). This keeps local-only config
+# from being left behind when a new workspace is created.
+#
+# NOTE: this protects *gitignored* files (like .env). The real defense against
+# losing untracked-but-not-ignored work is to COMMIT EARLY — that is why the
+# whole foundation is now tracked.
+.env
+.env.local
+.envrc
+app/.env
+app/.env.local
+.cargo/config.toml.local

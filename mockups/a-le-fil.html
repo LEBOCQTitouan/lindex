@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'Index — A · Le fil</title>
+<style>
+:root{
+  --ink:#1B1E26; --ink-soft:#3A3E48; --muted:#6C707A;
+  --paper:#F1F1EC; --card:#FFFFFF; --rule:#DAD9D2; --rule-soft:#E7E6E0;
+  --accent:#294270; --accent-soft:#E7ECF3;
+  --adopte:#3C6E58; --rejete:#9B4B3B; --reporte:#8A7635; --info:#5A5E68;
+  --pour:#3C6E58; --contre:#9B4B3B; --abst:#8A7635; --nv:#B9B8B1;
+  --serif:ui-serif,Georgia,"Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3{margin:0;font-family:var(--serif);font-weight:600;line-height:1.16;letter-spacing:-.01em}
+
+/* ============ shared atoms (identical across the 4 variants) ============ */
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--muted);background:var(--card);white-space:nowrap}
+.tag--chamber{color:var(--ink);border-color:var(--ink)}
+.tag--chamber[data-ch="SENAT"]{color:var(--accent);border-color:var(--accent)}
+.tag--chamber[data-ch="EXEC"]{color:#7A5A2A;border-color:#7A5A2A}
+.tag--theme{border-style:dashed}
+.tag--illus{color:#7A5A2A;border-color:#B98E3A;background:#FBF3E2;border-style:dotted}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;border:1px solid currentColor}
+.chip--adopte{color:var(--adopte);background:rgba(60,110,88,.08)}
+.chip--rejete{color:var(--rejete);background:rgba(155,75,59,.08)}
+.chip--reporte{color:var(--reporte);background:rgba(138,118,53,.08)}
+.chip--info{color:var(--info);background:rgba(90,94,104,.08)}
+.prov{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none}
+.prov__dot{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:700;flex:none}
+.prov__label{border-bottom:1px solid var(--rule)}
+a.prov:hover .prov__label{border-color:var(--accent);color:var(--ink)}
+.stat{display:inline-flex;flex-direction:column;line-height:1.15;vertical-align:middle}
+.stat__val{font-family:var(--mono);font-weight:700}
+.stat__unit{font-weight:400;margin-left:2px;color:var(--muted)}
+.stat__base{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.part{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:9px 0 2px}
+.part__gap{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.meter__bar{display:flex;height:12px;border-radius:6px;overflow:hidden;border:1px solid var(--rule);background:#fff}
+.seg{display:block}
+.seg.v-pour{background:var(--pour)}.seg.v-contre{background:var(--contre)}.seg.v-abst{background:var(--abst)}.seg.v-nv{background:var(--nv)}
+.seg.v-absent{background:repeating-linear-gradient(45deg,#E7E6DE,#E7E6DE 3px,#fff 3px,#fff 6px)}
+.meter__legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-size:12px;color:var(--muted)}
+.meter__legend b{font-family:var(--mono);color:var(--ink)}
+.meter__legend .is-ghost b{color:var(--muted)}
+.hemi-wrap{width:100%}
+.hemi{display:block;width:100%;height:auto}
+.seat{transition:fill .18s ease}
+.hemi--vote .seat[data-vote="pour"]{fill:var(--pour)}
+.hemi--vote .seat[data-vote="contre"]{fill:var(--contre)}
+.hemi--vote .seat[data-vote="abst"]{fill:var(--abst)}
+.hemi--vote .seat[data-vote="nv"]{fill:var(--nv)}
+.hemi--groupes .seat:not([data-vote="absent"]){fill:var(--gc)}
+.seat[data-vote="absent"]{fill:#fff;stroke:var(--nv);stroke-width:1;opacity:.5}
+.hemi-legend .lg-set{display:flex;flex-wrap:wrap;gap:6px 12px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.hemi-legend .lg{display:inline-flex;align-items:center;gap:5px}
+.hemi-legend .sw{width:10px;height:10px;border-radius:50%;display:inline-block}
+.hemi-legend .sw.v-pour{background:var(--pour)}.hemi-legend .sw.v-contre{background:var(--contre)}
+.hemi-legend .sw.v-abst{background:var(--abst)}.hemi-legend .sw.v-nv{background:var(--nv)}
+.hemi-legend .sw.v-absent{background:#fff;border:1px solid var(--nv)}
+.hemi-scope .lg-grp{display:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ============ variant A: the feed ============ */
+.wrap{max-width:480px;margin:0 auto;padding:0 16px 64px}
+.masthead{position:sticky;top:0;z-index:5;background:rgba(241,241,236,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule);padding:14px 0 10px;margin-bottom:8px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font-size:22px;letter-spacing:-.02em}
+.brand .variant{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 6px}
+.masthead .sub{margin-top:3px;font-size:13px;color:var(--muted)}
+.masthead .sub .mono{font-family:var(--mono)}
+.feednote{font-size:12.5px;color:var(--muted);font-style:italic;padding:8px 2px 12px;border-bottom:1px dashed var(--rule);margin-bottom:8px}
+.fil{position:relative;padding-left:74px}
+.fil::before{content:"";position:absolute;left:60px;top:6px;bottom:40px;width:2px;background:var(--rule)}
+.item{position:relative;padding:14px 0}
+.item__time{position:absolute;left:-74px;top:16px;width:54px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.25}
+.item__dot{position:absolute;left:-16px;top:19px;width:10px;height:10px;border-radius:50%;background:var(--card);border:2px solid var(--accent)}
+.item--info .item__dot{border-color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:14px 14px 12px;box-shadow:0 1px 0 rgba(27,30,38,.03)}
+.card__meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:9px}
+.card h2{font-size:18px;margin-bottom:6px}
+.card--info h2{font-size:16px;font-family:var(--sans);font-weight:600;letter-spacing:0}
+.card p{margin:0;font-size:14.5px;color:var(--ink-soft)}
+.card__viz{margin:12px 0 2px}
+.card__hemi{max-width:230px;margin:2px auto 6px}
+.card__foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:11px;padding-top:9px;border-top:1px solid var(--rule-soft)}
+.margeline{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.loadmore{display:block;width:100%;margin:18px 0 6px;padding:13px;font-family:var(--mono);font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);background:var(--card);border:1px solid var(--rule);border-radius:10px;cursor:pointer}
+.loadmore:hover{border-color:var(--accent)}
+.backlink{display:inline-block;margin-top:22px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand"><h1>L'Index</h1><span class="variant">A · Le fil</span></div>
+    <div class="sub" id="sub"></div>
+  </header>
+  <p class="feednote">Ordre chronologique, du plus récent au plus ancien. Pas de hiérarchie éditoriale — vous décidez de ce qui compte.</p>
+  <main class="fil" id="fil"></main>
+  <button class="loadmore" id="loadmore">Charger le reste de la journée</button>
+  <a class="backlink" href="index.html">← Comparer les variantes</a>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  var D = window.LINDEX.data, ui = window.LINDEX.ui, fmt = window.LINDEX.fmt;
+
+  document.getElementById('sub').innerHTML =
+    "Le fil de <b>" + D.edition.coversLabel + "</b> · <span class=\"mono\">Assemblée nationale</span>";
+
+  // Feed order: most recent first (sortKey descending)
+  var evs = D.events.slice().sort(function(a,b){ return b.sortKey - a.sortKey; });
+
+  function vizVote(e){
+    var v = e.vote; if(!v) return "";
+    var hemi = e.isLead ? '<div class="card__hemi">' + ui.hemicycleDots(v,{width:230,dot:2.4}) + '</div>' : "";
+    return '<div class="card__viz">' + hemi + ui.voteMeter(v) + ui.participation(v) + "</div>";
+  }
+
+  function card(e){
+    var isInfo = e.outcome === "info";
+    var meta = ui.chamberTag(e.chamber) + ui.themeTag(e.theme) +
+               '<span class="tag">' + ui.escape(e.type) + "</span>" +
+               ui.outcomeChip(e.outcome, e.outcomeLabel) + (e.illustrative ? ui.illusTag() : "");
+    var marge = e.vote ? '<span class="margeline">scrutin n° ' + e.vote.scrutinNo + '</span>' : '';
+    return '<article class="item ' + (isInfo?'item--info':'') + '">' +
+      '<span class="item__time">' + e.timeLabel + "</span>" +
+      '<span class="item__dot"></span>' +
+      '<div class="card ' + (isInfo?'card--info':'') + '">' +
+        '<div class="card__meta">' + meta + "</div>" +
+        "<h2>" + ui.escape(e.title) + "</h2>" +
+        "<p>" + ui.escape(e.summary) + "</p>" +
+        vizVote(e) +
+        '<div class="card__foot">' + ui.provenance(e.source) + marge + "</div>" +
+      "</div></article>";
+  }
+
+  var fil = document.getElementById('fil');
+  var shown = 3;
+  function render(){
+    fil.innerHTML = evs.slice(0, shown).map(card).join("");
+    document.getElementById('loadmore').style.display = shown >= evs.length ? "none" : "block";
+  }
+  document.getElementById('loadmore').addEventListener('click', function(){ shown = evs.length; render(); });
+  render();
+})();
+</script>
+</body>
+</html>

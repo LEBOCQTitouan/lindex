@@ -1,0 +1,15 @@
+[package]
+name = "ingest"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+
+# Composition root: the only place adapters meet ports.
+[dependencies]
+lindex-domain = { path = "../../crates/domain" }
+lindex-application = { path = "../../crates/application" }
+lindex-adapters-persistence = { path = "../../crates/adapters-persistence" }
+lindex-adapters-sources = { path = "../../crates/adapters-sources" }
+tokio.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true
