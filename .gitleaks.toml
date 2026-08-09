@@ -1,0 +1,10 @@
+# gitleaks secret scanning. Scans the whole tree (Rust + Next.js). Run in CI.
+# Each allowlist entry must carry a reason + a scope (path/regex), not a blanket.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Example/placeholder env files carry no real secrets"
+paths = [
+  '''\.env\.example$''',
+]

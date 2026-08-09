@@ -14,6 +14,15 @@ members = [
 edition = "2021"
 rust-version = "1.80"
 
+# Central lint policy. Warn-level here + `cargo clippy -- -D warnings` in CI = deny
+# in CI. Crates opt in with `[lints]\nworkspace = true`. Pure crates additionally
+# `#![forbid(unsafe_code)]` in their lib.rs (stricter than this default).
+[workspace.lints.rust]
+unsafe_code = "warn"
+
+[workspace.lints.clippy]
+all = "warn"
+
 [workspace.dependencies]
 thiserror = "2"
 anyhow = "1"

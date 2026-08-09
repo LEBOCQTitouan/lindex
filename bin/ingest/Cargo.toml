@@ -13,3 +13,6 @@ lindex-adapters-sources = { path = "../../crates/adapters-sources" }
 tokio.workspace = true
 anyhow.workspace = true
 sqlx.workspace = true
+
+[lints]
+workspace = true

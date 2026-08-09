@@ -1,0 +1,17 @@
+# Pin text files to LF so golden fixtures and generated files (read-model schema,
+# SQL, TS bindings) are byte-compared identically across platforms. A Windows
+# checkout with core.autocrlf=true would otherwise introduce CRLF drift and break
+# byte-equality tests.
+*.rs      text eol=lf
+*.toml    text eol=lf
+*.md      text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.json    text eol=lf
+*.sql     text eol=lf
+*.ts      text eol=lf
+*.tsx     text eol=lf
+*.js      text eol=lf
+*.css     text eol=lf
+*.html    text eol=lf
+.gitignore text eol=lf

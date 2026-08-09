@@ -1,0 +1,15 @@
+# Fast pre-commit — mirrors the CI fast checks and must stay in the seconds range.
+# Heavy work (full test suite) belongs in CI, never in a git hook. Each command
+# isolates its own CARGO_TARGET_DIR so parallel runs don't contend on one lock.
+# Emergency bypass: `git commit --no-verify`.
+pre-commit:
+  parallel: true
+  commands:
+    fmt:
+      glob: "*.rs"
+      run: cargo fmt --all -- --check
+    clippy:
+      glob: "*.{rs,toml}"
+      run: env CARGO_INCREMENTAL=0 CARGO_TARGET_DIR=target/lefthook/clippy cargo clippy --workspace --all-targets -- -D warnings
+    secrets:
+      run: gitleaks protect --staged --no-banner --config .gitleaks.toml

@@ -1,20 +1,55 @@
 name: rust
 
-# Runs only when the data plane changes (idiomatic per-path filtering).
+# Data-plane gate. Mirrors `just ci` byte-for-byte (local == CI). Runs only when
+# the hexagon changes. NOTE: actions are tag-pinned for now; SHA-pin them (tau
+# convention) as a follow-up hardening step.
 on:
   push:
-    paths: ["crates/**", "bin/**", "Cargo.toml", "Cargo.lock", "rust-toolchain.toml", ".github/workflows/rust.yml"]
+    paths: ["crates/**", "bin/**", "Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "rustfmt.toml", "clippy.toml", "deny.toml", ".config/nextest.toml", ".github/workflows/rust.yml"]
   pull_request:
-    paths: ["crates/**", "bin/**", "Cargo.toml", "Cargo.lock", "rust-toolchain.toml", ".github/workflows/rust.yml"]
+    paths: ["crates/**", "bin/**", "Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "rustfmt.toml", "clippy.toml", "deny.toml", ".config/nextest.toml", ".github/workflows/rust.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  CARGO_INCREMENTAL: "0"
+  CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
-      - run: cargo fmt --all --check
-      - run: cargo clippy --workspace -- -D warnings
-      - run: cargo test --workspace
+      - uses: Swatinem/rust-cache@v2
+        with:
+          # PRs read the cache but only main writes it (no write contention).
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest,cargo-deny
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo nextest run --profile ci --workspace --all-targets
+      - run: cargo test --workspace --doc
+      - run: cargo deny --all-features check
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml

@@ -10,3 +10,6 @@ lindex-domain = { path = "../domain" }
 lindex-application = { path = "../application" }
 async-trait.workspace = true
 sqlx.workspace = true
+
+[lints]
+workspace = true

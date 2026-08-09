@@ -9,3 +9,6 @@ rust-version.workspace = true
 lindex-domain = { path = "../domain" }
 async-trait.workspace = true
 thiserror.workspace = true
+
+[lints]
+workspace = true

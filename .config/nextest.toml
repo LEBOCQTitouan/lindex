@@ -1,0 +1,15 @@
+# cargo-nextest profiles.
+# Local: retries mask flakes for a snappy loop. CI: no retries — a flake is real
+# signal. To quarantine a known flaky test, add a [[profile.ci.overrides]] with a
+# `filter` and a promotion policy (nextest validates filters at parse time, so an
+# empty override block would fail — only add one with a real filter).
+
+[profile.default]
+retries = 2
+failure-output = "immediate-final"
+success-output = "never"
+
+[profile.ci]
+retries = 0
+failure-output = "immediate-final"
+success-output = "never"
