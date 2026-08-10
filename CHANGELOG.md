@@ -7,6 +7,15 @@ All notable changes to L'Index are documented here. Format:
 ## [Unreleased]
 
 ### Added
+- **L1-OPS unattended ingestion:** `ingest reingest <AN|SENAT> <from> <to>`
+  re-ingests every persisted scrutin held in the day-range, idempotently (US-8.4),
+  recording one batch `facts.ingestion_run` row and exiting non-zero on failure.
+  New `application::ops` ports `ScrutinCalendar` (work-set from `facts.scrutin.
+  held_on`) and `Alerter`, a `ReingestRange` use case, and an `adapters-notify`
+  crate (`LogAlerter` + `WebhookAlerter`) that alerts on failure (US-8.1). systemd
+  timers (`ops/systemd/`) schedule a rolling-window re-ingest per chamber with an
+  `OnFailure=` fallback notifier; operator runbook in `docs/ops/`. Rationale +
+  the no-upstream-discovery limitation in ADR-0002.
 - **L0-DATA spine:** AN scrutin ingest end-to-end — `ingest scrutin <id>` fetches
   the AN `dyn` analysis page, parses it to a normalized source record, validates
   it in the domain, persists `facts.scrutin`, and projects `facts.read_scrutin`

@@ -157,9 +157,7 @@ mod tests {
         ParliamentSource, RawGroup, RawScrutin, RawScrutinData, RawTotals, ReadModelStore,
         ScrutinRepository, ScrutinView, SourceError,
     };
-    use lindex_domain::{
-        Provenance, ProvenanceTier, Scrutin, SourceRef, Sourced, VoteTotals,
-    };
+    use lindex_domain::{Provenance, ProvenanceTier, Scrutin, SourceRef, Sourced, VoteTotals};
     use std::collections::{HashMap, HashSet};
     use std::sync::Mutex;
 
@@ -221,10 +219,7 @@ mod tests {
     }
     #[async_trait]
     impl ParliamentSource for FakeSource {
-        async fn fetch_scrutin(
-            &self,
-            id: &ScrutinId,
-        ) -> Result<Sourced<RawScrutin>, SourceError> {
+        async fn fetch_scrutin(&self, id: &ScrutinId) -> Result<Sourced<RawScrutin>, SourceError> {
             if self.fail_ids.contains(&id.0) {
                 return Err(SourceError::Unavailable(format!("boom {}", id.0)));
             }
@@ -253,10 +248,7 @@ mod tests {
     }
     #[async_trait]
     impl ScrutinRepository for FakeRepo {
-        async fn put_source_record(
-            &self,
-            raw: &Sourced<RawScrutin>,
-        ) -> Result<(), RepoError> {
+        async fn put_source_record(&self, raw: &Sourced<RawScrutin>) -> Result<(), RepoError> {
             let id = raw.provenance().source.record_id.clone();
             self.source_records
                 .lock()
@@ -266,7 +258,10 @@ mod tests {
         }
         async fn upsert(&self, scrutin: &Sourced<Scrutin>) -> Result<(), RepoError> {
             let s = scrutin.value().clone();
-            self.scrutins.lock().expect("lock").insert(s.id.0.clone(), s);
+            self.scrutins
+                .lock()
+                .expect("lock")
+                .insert(s.id.0.clone(), s);
             Ok(())
         }
         async fn by_id(&self, id: &ScrutinId) -> Result<Option<Scrutin>, RepoError> {

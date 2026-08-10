@@ -7,7 +7,9 @@
 
 use async_trait::async_trait;
 use lindex_adapters_persistence::PgStore;
-use lindex_application::ops::{Alerter, AlertError, IngestionAlert, ReingestRange, ScrutinCalendar};
+use lindex_application::ops::{
+    AlertError, Alerter, IngestionAlert, ReingestRange, ScrutinCalendar,
+};
 use lindex_application::ports::{
     ParliamentSource, RawGroup, RawScrutin, RawScrutinData, RawTotals, SourceError,
 };
@@ -138,14 +140,22 @@ async fn reingest_range_is_idempotent_over_persisted_scrutins() {
 
     // The calendar sees both same-day scrutins, and none the day after.
     let in_day = store
-        .ids_in_range(Chamber::AssembleeNationale, day("2026-07-21"), day("2026-07-21"))
+        .ids_in_range(
+            Chamber::AssembleeNationale,
+            day("2026-07-21"),
+            day("2026-07-21"),
+        )
         .await
         .expect("ids");
     let found: std::collections::HashSet<String> = in_day.iter().map(|i| i.0.clone()).collect();
     assert!(found.contains("8433"));
     assert!(found.contains("8430"));
     let next_day = store
-        .ids_in_range(Chamber::AssembleeNationale, day("2026-07-22"), day("2026-07-22"))
+        .ids_in_range(
+            Chamber::AssembleeNationale,
+            day("2026-07-22"),
+            day("2026-07-22"),
+        )
         .await
         .expect("ids");
     assert!(!next_day.iter().any(|i| i.0 == "8433" || i.0 == "8430"));
@@ -165,14 +175,22 @@ async fn reingest_range_is_idempotent_over_persisted_scrutins() {
         alerter: &alerter,
     };
     let report = rr
-        .run(Chamber::AssembleeNationale, day("2026-07-21"), day("2026-07-21"))
+        .run(
+            Chamber::AssembleeNationale,
+            day("2026-07-21"),
+            day("2026-07-21"),
+        )
         .await
         .expect("reingest");
     assert_eq!(report.attempted, 2);
     assert!(report.failures.is_empty());
-    rr.run(Chamber::AssembleeNationale, day("2026-07-21"), day("2026-07-21"))
-        .await
-        .expect("reingest again");
+    rr.run(
+        Chamber::AssembleeNationale,
+        day("2026-07-21"),
+        day("2026-07-21"),
+    )
+    .await
+    .expect("reingest again");
 
     for id in ["8433", "8430"] {
         let n: i64 = sqlx::query("select count(*) from facts.scrutin where id = $1")
