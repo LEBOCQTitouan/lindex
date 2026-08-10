@@ -59,11 +59,55 @@ coordinator always knows what is next and whether the chat is safe to archive:
 - Status: ✅ done | 🟣 in-review (PR #) | 🔵 paused (blocked on <what>)
 - Landed: <one-line summary> · PR: <link>
 - Verified: <DoD evidence — test output, page renders, cargo/pnpm clean>
-- Next actions: <downstream lanes now unblocked, by id> · <follow-ups, if any>
+- Next actions: <downstream lanes now unblocked, by id>
+- Follow-ups (paste-ready, from §5): <one self-contained handoff block per
+  newly-ready & unclaimed lane, or "none — no new lanes unblocked">
 - Archive-ok: YES — nothing pending/blocked/running
             | NO — still live: <what> (per CLAUDE.md, never archive while live)
 ```
 
-The **Next actions** and **Archive-ok** lines are mandatory. "Archive-ok: YES"
-is allowed only when your work is merged (or fully handed off) and nothing is
-pending, blocked, or running in the background.
+The **Next actions**, **Follow-ups**, and **Archive-ok** lines are mandatory.
+"Archive-ok: YES" is allowed only when your work is merged (or fully handed off)
+and nothing is pending, blocked, or running in the background.
+
+## 5. Emit the next tasks — the self-perpetuating chain
+So the human never has to work out what to start next, **every merged lane emits
+its follow-ups**. It is status-aware, so parallel agents don't emit redundant work.
+
+Run this as you merge (or when you open the PR, marking follow-ups queued):
+1. Read the status board on latest `main`: `git fetch origin`, then
+   `git show origin/main:docs/roadmap.md`.
+2. Flip **your** lane's row to ✅ in your merge.
+3. **READY** = every lane whose deps are *all* ✅ on the board.
+4. **AVAILABLE** = READY minus any lane that already has a branch
+   (`git branch -a`, open PRs) or whose row is 🔵 / 🟣 / ✅ / 🟡-queued.
+5. For each AVAILABLE lane, emit a **self-contained handoff** (template below) in
+   your session-end report, and mark its board row `🟡 queued` in your board
+   update so a near-simultaneous finisher won't re-emit it. (A lane usually
+   becomes ready only when its *last* dep merges, so the finisher of that dep is
+   the natural sole emitter; this guard just covers ties.)
+6. If AVAILABLE is empty: state "No new lanes unblocked."
+
+The human copies each emitted block into a fresh workspace **verbatim — no edits.**
+
+### Self-contained handoff template (fill `<LANE>`, `<deps>`, `<task>`)
+```
+Implement lane <LANE> of L'Index (Rust hexagonal data plane crates/ + bin/,
+Next.js app plane app/, shared Postgres facts/app schemas).
+1) Sync: git fetch origin && git merge origin/main
+2) Read: CLAUDE.md, CONSTITUTION.md, GUIDELINES_CHEATSHEET.md, docs/handoff-protocol.md,
+   docs/roadmap.md (§<LANE> + deps), docs/project-brief.md, docs/user-stories.md, docs/indicator-catalog.md.
+3) Deps (must be ✅ on the roadmap board, else stop and report blocked): <deps>
+4) Task: <one-paragraph task, copied from docs/roadmap.md §<LANE>>
+5) Method: follow docs/handoff-protocol.md — superpowers skills in order (brainstorming only if a
+   design choice is ambiguous → writing-plans → test-driven-development → executing-plans →
+   verification-before-completion → requesting-code-review → finishing-a-development-branch).
+   New files only where possible; never edit another lane's files.
+6) Rules: baseline on every figure; provenance + source on every datum; no composite
+   scores/rankings/verdicts; symmetry; French UI / English code; thiserror in libs, anyhow
+   in bins; #![forbid(unsafe_code)]; no unwrap/expect/panic in library code.
+7) Gate: `just ci` (data plane) and/or `just app-lint app-build` (app plane) — local == CI.
+8) Commit: Conventional Commits (scope = crate/package, body = why). PR:
+   gh pr merge <PR#> --squash --delete-branch --auto, then gh pr update-branch <PR#> while BEHIND.
+9) Finish with the session-end report (§4) AND emit follow-ups (§5).
+```
