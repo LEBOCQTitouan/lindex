@@ -47,3 +47,6 @@ db-down:
     docker compose down
 migrate:
     for f in db/migrations/*.sql; do psql "$DATABASE_URL" -f "$f"; done
+# Seed the read-models from the mockup fixtures (contract-first app dev).
+db-seed:
+    for f in db/seed/*.sql; do psql "$DATABASE_URL" -f "$f"; done

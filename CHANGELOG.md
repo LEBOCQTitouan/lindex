@@ -7,6 +7,13 @@ All notable changes to L'Index are documented here. Format:
 ## [Unreleased]
 
 ### Added
+- L0-APP spine: `/scrutin/[id]` renders entirely from the `facts.read_scrutin`
+  read-model — totals, the participation gap (votants vs 577 seats) with its
+  day-median baseline, provenance chip + source link, and the ported
+  `<Hemicycle>` island (Vote ↔ Groupes toggle). Read-model seed from the mockup
+  fixtures (`db/seed/read_scrutin.sql`, scrutins 8433 & 8430); pure mapping in
+  `app/src/lib` unit-tested with Vitest; swaps to L0-DATA's real rows with zero
+  app changes. App toolchain wired for the CI gate (ESLint, lockfile, Vitest).
 - Homepage mockups: four variants + hybrid on real Assemblée nationale data
   (21 Jul 2026), with a shared fixture and a dot-hémicycle (Vote ↔ Groupes).
 - Rust data-plane scaffold (hexagonal): `domain` (invariant types), `application`
