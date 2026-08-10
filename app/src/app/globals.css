@@ -1,11 +1,23 @@
-/* Design tokens ported from the mockups (mockups/*.html). */
+/* Design system ported from the mockups (mockups/d-hybride.html, data.js).
+   App text is French; these are the shared atoms the scrutin page composes. */
 :root {
   --ink: #1b1e26;
+  --ink-soft: #3a3e48;
   --muted: #6c707a;
   --paper: #f1f1ec;
   --card: #fff;
   --rule: #dad9d2;
+  --rule-soft: #e7e6e0;
   --accent: #294270;
+  --accent-soft: #e7ecf3;
+  --adopte: #3c6e58;
+  --rejete: #9b4b3b;
+  --reporte: #8a7635;
+  --info: #5a5e68;
+  --pour: #3c6e58;
+  --contre: #9b4b3b;
+  --abst: #8a7635;
+  --nv: #b9b8b1;
   --serif: ui-serif, Georgia, "Times New Roman", serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -18,14 +30,20 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--sans);
+  font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 a {
   color: var(--accent);
 }
-h1 {
+h1,
+h2,
+h3 {
+  margin: 0;
   font-family: var(--serif);
+  font-weight: 600;
+  line-height: 1.16;
   letter-spacing: -0.01em;
 }
 .wrap {
@@ -39,25 +57,285 @@ h1 {
 .muted {
   color: var(--muted);
 }
-.hemi {
-  margin: 16px 0;
+
+/* --- tags & chips -------------------------------------------------------- */
+.tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  color: var(--muted);
+  background: var(--card);
+  white-space: nowrap;
 }
-.hemi svg {
+.tag--chamber {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.tag--chamber[data-ch="SENAT"] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.chip {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid currentColor;
+}
+.chip--adopte {
+  color: var(--adopte);
+  background: rgba(60, 110, 88, 0.08);
+}
+.chip--rejete {
+  color: var(--rejete);
+  background: rgba(155, 75, 59, 0.08);
+}
+.chip--reporte {
+  color: var(--reporte);
+  background: rgba(138, 118, 53, 0.08);
+}
+.chip--info {
+  color: var(--info);
+  background: rgba(90, 94, 104, 0.08);
+}
+
+/* --- provenance (label + source link, never a score) --------------------- */
+.prov {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.prov__dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  flex: none;
+}
+.prov__label {
+  border-bottom: 1px solid var(--rule);
+}
+a.prov:hover .prov__label {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+/* --- stat (a figure always paired with its baseline) --------------------- */
+.stat {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.15;
+  vertical-align: middle;
+}
+.stat__val {
+  font-family: var(--mono);
+  font-weight: 700;
+}
+.stat__unit {
+  font-weight: 400;
+  margin-left: 2px;
+  color: var(--muted);
+}
+.stat__base {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+/* --- participation ------------------------------------------------------- */
+.part {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 10px 0 2px;
+}
+.part__gap {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* --- linear vote meter (spans all seats; absent is a ghost hatch) -------- */
+.meter__bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  background: #fff;
+}
+.seg {
+  display: block;
+}
+.seg.v-pour {
+  background: var(--pour);
+}
+.seg.v-contre {
+  background: var(--contre);
+}
+.seg.v-abst {
+  background: var(--abst);
+}
+.seg.v-nv {
+  background: var(--nv);
+}
+.seg.v-absent {
+  background: repeating-linear-gradient(45deg, #e7e6de, #e7e6de 3px, #fff 3px, #fff 6px);
+}
+.meter__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.meter__legend b {
+  font-family: var(--mono);
+  color: var(--ink);
+}
+.meter__legend .ml--pour,
+.meter__legend .ml--pour b {
+  color: var(--pour);
+}
+.meter__legend .ml--contre,
+.meter__legend .ml--contre b {
+  color: var(--contre);
+}
+.meter__legend .ml--abst,
+.meter__legend .ml--abst b {
+  color: var(--abst);
+}
+.meter__legend .is-ghost,
+.meter__legend .is-ghost b {
+  color: var(--muted);
+}
+
+/* --- dot hémicycle island ------------------------------------------------ */
+.hemi-block {
+  margin: 16px 0 2px;
+  background: #fbfbf9;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 14px;
+}
+.hemi-scope {
+  margin: 0;
+}
+.hemi-block__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.hemi-block__t {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.hemi-wrap {
+  width: 100%;
+}
+.hemi {
   display: block;
   width: 100%;
   height: auto;
+}
+.seat {
+  transition: fill 0.18s ease;
+}
+.hemi-legend {
+  margin-top: 10px;
+}
+.hemi-legend .lg-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.hemi-legend .lg {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.hemi-legend .sw {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.hemi-legend .sw.v-pour {
+  background: var(--pour);
+}
+.hemi-legend .sw.v-contre {
+  background: var(--contre);
+}
+.hemi-legend .sw.v-abst {
+  background: var(--abst);
+}
+.hemi-legend .sw.v-nv {
+  background: var(--nv);
+}
+.hemi-legend .sw.v-absent {
+  background: #fff;
+  border: 1px solid var(--nv);
+}
+.hemi-legend .lg--pour {
+  color: var(--pour);
+}
+.hemi-legend .lg--contre {
+  color: var(--contre);
+}
+.hemi-legend .lg--abst {
+  color: var(--abst);
+}
+.hemi-legend .lg--nv,
+.hemi-legend .lg--absent {
+  color: var(--muted);
+}
+.hemi-scope .lg-grp {
+  display: none;
+}
+.hemi-scope.show-grp .lg-vote {
+  display: none;
+}
+.hemi-scope.show-grp .lg-grp {
+  display: flex;
 }
 .hemi-toggle {
   display: inline-flex;
   border: 1px solid var(--rule);
   border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 10px;
 }
 .hemi-toggle button {
   font-family: var(--mono);
-  font-size: 12px;
-  padding: 5px 12px;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  padding: 5px 11px;
   background: var(--card);
   border: 0;
   cursor: pointer;
@@ -70,6 +348,49 @@ h1 {
   background: var(--accent);
   color: #fff;
 }
+
+/* --- scrutin page scaffolding ------------------------------------------- */
+.scrutin__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.scrutin h1 {
+  font-size: 27px;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule-soft);
+}
+.margeline {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.updated {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 16px;
+}
+.backlink {
+  display: inline-block;
+  margin-top: 22px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
