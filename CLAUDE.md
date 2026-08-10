@@ -39,17 +39,19 @@ env CARGO_INCREMENTAL=0 CARGO_TARGET_DIR=target/agent cargo <cmd> -p <crate>
 ```
 Scope with `-p <crate>`; wrap long commands in `timeout`; prefer `cargo nextest`.
 
-## MERGE RULES (private repo — no auto-merge / merge queue)
-Lane sessions **open a PR and stop** — they do not merge. A single **coordinator**
-session merges, manually, in dependency order:
-1. Review the PR; confirm `just ci` (and app build) is green on it.
-2. `gh pr update-branch <PR#>` if GitHub reports **BEHIND** (repeat if main moved).
-3. `gh pr merge <PR#> --squash --delete-branch` (no `--auto` — unavailable here).
-4. The coordinator then emits the next tasks (see `docs/handoff-protocol.md` §5).
+## MERGE RULES (private repo — no coordinator; lanes self-merge)
+No auto-merge / merge queue and no coordinator session: each lane merges its OWN PR
+when green, then emits the next tasks — fully autonomous.
+1. `just ci` (and app build for app lanes) must be green — this is the gate.
+2. `git fetch origin && git merge origin/main`; if anything changed, re-run `just ci`.
+3. `gh pr merge <PR#> --squash --delete-branch` (immediate, not `--auto`). If GitHub
+   rejects it as behind (another lane merged first), repeat 2–3 until it lands.
+4. Then emit the next tasks (`docs/handoff-protocol.md` §5).
+There is no branch protection, so green `just ci` + the requesting-code-review
+self-checklist IS the gate — never merge red, never skip the sync in step 2.
 
 Commit with an explicit identity to survive any corrupted worktree-local config:
 `git -c user.name="<you>" -c user.email="<you>" commit …`
-Never: merge red CI; merge a lane's PR without review.
 
 ## Class-A changes require an ADR (`docs/decisions/`)
 read-model / data-schema changes, public routes or API, DB migrations,

@@ -25,9 +25,9 @@ This file is the mechanics.
 - Every new dependency is justified in the PR description.
 - Review is required even solo (reviewer, overnight delay, or the self-checklist).
   Never merge red CI. Never same-day self-merge without the checklist.
-- Merging (see CLAUDE.md → MERGE RULES): lane sessions open a PR and stop; a
-  coordinator merges manually — `gh pr update-branch <PR#>` if BEHIND, then
-  `gh pr merge <PR#> --squash --delete-branch` (no auto-merge on this private repo).
+- Merging (see CLAUDE.md → MERGE RULES): each lane self-merges when green — sync
+  with main + re-run `just ci`, then `gh pr merge <PR#> --squash --delete-branch`
+  (retry if another lane merged first). No auto-merge and no coordinator.
 
 ## Class-A changes need an ADR
 read-model/schema, public API/routes, DB migrations, cross-plane interfaces,
