@@ -1,0 +1,20 @@
+#!/bin/sh
+# Compute a rolling day-window and re-ingest it for one chamber (US-8.1/8.4).
+# Invoked by lindex-reingest@.service with the chamber code as $1. The window is
+# LINDEX_WINDOW_DAYS days back from today (default 2), so a daily run keeps the
+# most recent scrutins re-projected without needing an exact date each day.
+#
+# Re-ingest derives its work set from already-persisted scrutins (facts.scrutin);
+# it does NOT discover new scrutin ids upstream — see docs/ops/ingestion-runbook.md.
+set -eu
+
+CHAMBER="${1:?usage: lindex-reingest-window <AN|SENAT>}"
+DAYS="${LINDEX_WINDOW_DAYS:-2}"
+INGEST="${LINDEX_INGEST_BIN:-/usr/local/bin/ingest}"
+
+TO="$(date -u +%Y-%m-%d)"
+# GNU date (Linux/systemd hosts) then BSD date (macOS) fallback for local runs.
+FROM="$(date -u -d "-${DAYS} days" +%Y-%m-%d 2>/dev/null \
+        || date -u -v-"${DAYS}"d +%Y-%m-%d)"
+
+exec "$INGEST" reingest "$CHAMBER" "$FROM" "$TO"
