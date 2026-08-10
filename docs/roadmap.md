@@ -32,7 +32,7 @@ Tracks: `T1` Sources (Rust) · `T2` Domain+Projections (Rust) · `T3` App (Next.
 | Lane | Phase | Deps | US | Status | Unblocks |
 |---|---|---|---|---|---|
 | **L0-DATA** spine (data) | P0 | — | 3.1, 8.4, 7.2 | ⬜ | everything |
-| **L0-APP** spine (app, on fixtures) | P0 | schema shape | 3.1, 7.4 | ⬜ | all app lanes |
+| **L0-APP** spine (app, on fixtures) | P0 | schema shape | 3.1, 7.4 | 🔵 | all app lanes |
 | L1-DIGEST | P1 | L0 | 1.1,1.2,1.3,1.5 | ⬜ | — |
 | L1-SCRUTIN full | P1 | L0 | 3.1, 3.6 | ⬜ | L2-JUSTIF |
 | L1-METHODO | P1 | L0-APP | 7.1,7.2,7.4 | ⬜ | — |
