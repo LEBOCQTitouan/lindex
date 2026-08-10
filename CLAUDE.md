@@ -39,15 +39,17 @@ env CARGO_INCREMENTAL=0 CARGO_TARGET_DIR=target/agent cargo <cmd> -p <crate>
 ```
 Scope with `-p <crate>`; wrap long commands in `timeout`; prefer `cargo nextest`.
 
-## AGENT PUSH RULES (the multi-workspace merge race)
-`main` is protected: PRs must be up-to-date (strict). To merge:
-1. `gh pr merge <PR#> --squash --delete-branch --auto`  (enrol once)
-2. `gh pr update-branch <PR#>`  whenever GitHub reports **BEHIND** (repeat if main keeps moving — `--auto` does NOT update-branch for you)
-3. GitHub auto-merges when CI is green **and** the branch is current.
+## MERGE RULES (private repo — no auto-merge / merge queue)
+Lane sessions **open a PR and stop** — they do not merge. A single **coordinator**
+session merges, manually, in dependency order:
+1. Review the PR; confirm `just ci` (and app build) is green on it.
+2. `gh pr update-branch <PR#>` if GitHub reports **BEHIND** (repeat if main moved).
+3. `gh pr merge <PR#> --squash --delete-branch` (no `--auto` — unavailable here).
+4. The coordinator then emits the next tasks (see `docs/handoff-protocol.md` §5).
 
 Commit with an explicit identity to survive any corrupted worktree-local config:
 `git -c user.name="<you>" -c user.email="<you>" commit …`
-Never: merge red CI; self-merge without the review checklist.
+Never: merge red CI; merge a lane's PR without review.
 
 ## Class-A changes require an ADR (`docs/decisions/`)
 read-model / data-schema changes, public routes or API, DB migrations,
