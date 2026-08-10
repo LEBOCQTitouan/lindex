@@ -8,6 +8,9 @@ import type { GroupTally } from "./read-model";
 
 // AN 17th-legislature groups, hémicycle order left→right (id, colour, seats).
 // Reference data (577 seats), not per-scrutin — identical for every AN vote.
+// AN-ONLY: seat count and per-group `absent` derive from this table, so this
+// renders a 577-seat Assemblée for any row. A Sénat read_scrutin (348 seats)
+// needs its own group reference before it can be drawn (future L1-SENAT lane).
 export const GROUPS_AN: { id: string; color: string; members: number }[] = [
   { id: "LFI", color: "#C4002E", members: 71 },
   { id: "GDR", color: "#B5121B", members: 17 },

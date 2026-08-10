@@ -61,6 +61,10 @@ describe("ScrutinPage", () => {
     expect(html).toContain("médiane du jour : 426");
     expect(html).toContain("93 % des sièges");
     expect(html).toContain("38 absent·es · 2 non-votant·es");
+    // Abstention is a displayed figure → it must ship with its baseline (P1).
+    // Its day-median (7) is distinct from the votants median (426).
+    expect(html).toContain("abstentions");
+    expect(html).toContain("médiane du jour : 7");
     // Provenance chip → source link (P4)
     expect(html).toContain("https://www.assemblee-nationale.fr/dyn/17/scrutins/8433");
     expect(html).toContain("Scrutin n° 8433 — AN");

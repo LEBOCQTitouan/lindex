@@ -35,9 +35,12 @@ function chamberShort(c: string): string {
   return c === "AN" ? "AN" : c === "SENAT" ? "Sénat" : c === "EXEC" ? "JO" : c;
 }
 
+// Pin the timezone so a French civic site renders Paris time deterministically
+// regardless of where the server runs.
 const UPDATED_FMT = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "long",
   timeStyle: "short",
+  timeZone: "Europe/Paris",
 });
 
 export default async function ScrutinPage({
@@ -95,6 +98,15 @@ export default async function ScrutinPage({
         </span>
         <span className="part__gap">
           {part.absent} absent·es · {part.nonVotants} non-votant·es
+        </span>
+        {/* Abstention is a figure in its own right → it ships with its baseline
+            (P1); 8430 is the seeded high-abstention showcase. */}
+        <span className="stat">
+          <span className="stat__val">
+            {totals.abstention}
+            <span className="stat__unit"> abstentions</span>
+          </span>
+          <span className="stat__base">médiane du jour : {baselines.abstention}</span>
         </span>
       </div>
 
