@@ -1,6 +1,7 @@
 //! Scrutin (recorded vote) — the flagship domain object.
 
 use crate::error::DomainError;
+use chrono::NaiveDate;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Chamber {
@@ -57,6 +58,9 @@ pub struct Scrutin {
     pub id: ScrutinId,
     pub chamber: Chamber,
     pub title: String,
+    /// Calendar date of the sitting — the key that groups a scrutin's
+    /// comparables for the day-median baseline.
+    pub held_on: NaiveDate,
     pub totals: VoteTotals,
     /// Left→right hémicycle order.
     pub breakdown: Vec<GroupTally>,
@@ -69,6 +73,7 @@ impl Scrutin {
         id: ScrutinId,
         chamber: Chamber,
         title: String,
+        held_on: NaiveDate,
         totals: VoteTotals,
         breakdown: Vec<GroupTally>,
     ) -> Result<Self, DomainError> {
@@ -83,8 +88,85 @@ impl Scrutin {
             id,
             chamber,
             title,
+            held_on,
             totals,
             breakdown,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn date() -> NaiveDate {
+        NaiveDate::from_ymd_opt(2026, 7, 21).expect("valid date")
+    }
+
+    fn totals() -> VoteTotals {
+        VoteTotals {
+            pour: 18,
+            contre: 72,
+            abstention: 5,
+            non_votants: 0,
+            members_total: 577,
+        }
+    }
+
+    fn breakdown() -> Vec<GroupTally> {
+        vec![
+            GroupTally {
+                group: GroupId("LFI".into()),
+                pour: 0,
+                contre: 71,
+                abstention: 0,
+                non_votant: 0,
+            },
+            GroupTally {
+                group: GroupId("LIOT".into()),
+                pour: 18,
+                contre: 1,
+                abstention: 4,
+                non_votant: 0,
+            },
+            GroupTally {
+                group: GroupId("NI".into()),
+                pour: 0,
+                contre: 0,
+                abstention: 1,
+                non_votant: 0,
+            },
+        ]
+    }
+
+    #[test]
+    fn reconciling_breakdown_builds_and_preserves_held_on() {
+        let s = Scrutin::try_new(
+            ScrutinId("8433".into()),
+            Chamber::AssembleeNationale,
+            "Ordre public".into(),
+            date(),
+            totals(),
+            breakdown(),
+        )
+        .expect("reconciles");
+        assert_eq!(s.held_on, date());
+        assert_eq!(s.totals.votants(), 95);
+    }
+
+    #[test]
+    fn non_reconciling_breakdown_is_rejected() {
+        let mut bad = breakdown();
+        bad[0].contre = 70; // one vote short of the declared total
+        let err = Scrutin::try_new(
+            ScrutinId("8433".into()),
+            Chamber::AssembleeNationale,
+            "Ordre public".into(),
+            date(),
+            totals(),
+            bad,
+        )
+        .expect_err("must not reconcile");
+        assert!(matches!(err, DomainError::Reconciliation));
     }
 }

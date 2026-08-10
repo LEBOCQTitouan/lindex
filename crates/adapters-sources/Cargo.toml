@@ -3,13 +3,21 @@ name = "lindex-adapters-sources"
 version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
+publish = false
 
 # Driven adapter: Assemblée nationale open data over HTTP.
 [dependencies]
 lindex-domain = { path = "../domain" }
 lindex-application = { path = "../application" }
 async-trait.workspace = true
+thiserror.workspace = true
 reqwest.workspace = true
+regex.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true
 
 [lints]
 workspace = true

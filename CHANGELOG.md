@@ -7,6 +7,13 @@ All notable changes to L'Index are documented here. Format:
 ## [Unreleased]
 
 ### Added
+- **L0-DATA spine:** AN scrutin ingest end-to-end — `ingest scrutin <id>` fetches
+  the AN `dyn` analysis page, parses it to a normalized source record, validates
+  it in the domain, persists `facts.scrutin`, and projects `facts.read_scrutin`
+  with provenance and **day-median baselines**; re-running is idempotent (US-8.4).
+  Real 8430/8433 pages are golden parser fixtures. Contract pinned in ADR-0001.
+- `Scrutin.held_on`, `Baseline::from_samples` (median of comparables), the
+  normalized `RawScrutinData` port payload, and `facts.ingestion_run` audit rows.
 - Homepage mockups: four variants + hybrid on real Assemblée nationale data
   (21 Jul 2026), with a shared fixture and a dot-hémicycle (Vote ↔ Groupes).
 - Rust data-plane scaffold (hexagonal): `domain` (invariant types), `application`
