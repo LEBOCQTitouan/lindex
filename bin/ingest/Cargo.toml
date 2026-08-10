@@ -11,9 +11,11 @@ lindex-domain = { path = "../../crates/domain" }
 lindex-application = { path = "../../crates/application" }
 lindex-adapters-persistence = { path = "../../crates/adapters-persistence" }
 lindex-adapters-sources = { path = "../../crates/adapters-sources" }
+lindex-adapters-notify = { path = "../../crates/adapters-notify" }
 tokio.workspace = true
 anyhow.workspace = true
 sqlx.workspace = true
+chrono.workspace = true
 
 [lints]
 workspace = true

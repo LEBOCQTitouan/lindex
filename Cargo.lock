@@ -821,6 +821,8 @@ name = "ingest"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono",
+ "lindex-adapters-notify",
  "lindex-adapters-persistence",
  "lindex-adapters-sources",
  "lindex-application",
