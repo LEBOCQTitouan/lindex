@@ -16,6 +16,15 @@ All notable changes to L'Index are documented here. Format:
   timers (`ops/systemd/`) schedule a rolling-window re-ingest per chamber with an
   `OnFailure=` fallback notifier; operator runbook in `docs/ops/`. Rationale +
   the no-upstream-discovery limitation in ADR-0002.
+- L0-APP spine: `/scrutin/[id]` renders entirely from the `facts.read_scrutin`
+  read-model — totals, the participation gap (votants vs 577 seats) with its
+  day-median baseline, provenance chip + source link, and the ported
+  `<Hemicycle>` island (Vote ↔ Groupes toggle). Built against the ADR-0001 wire
+  contract (nested baselines, `provenance.label`, `held_on`), so it swaps to
+  L0-DATA's real rows with zero further changes. Read-model seed from the mockup
+  fixtures (`db/seed/read_scrutin.sql`, scrutins 8433 & 8430); pure mapping in
+  `app/src/lib` unit-tested with Vitest; app toolchain wired for the CI gate
+  (ESLint, lockfile, Vitest, pinned pnpm).
 - **L0-DATA spine:** AN scrutin ingest end-to-end — `ingest scrutin <id>` fetches
   the AN `dyn` analysis page, parses it to a normalized source record, validates
   it in the domain, persists `facts.scrutin`, and projects `facts.read_scrutin`

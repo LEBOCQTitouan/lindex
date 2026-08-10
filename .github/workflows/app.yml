@@ -22,7 +22,11 @@ jobs:
         working-directory: app
     steps:
       - uses: actions/checkout@v4
+      # action-setup runs at repo root (no root package.json here), so pin the
+      # version explicitly rather than relying on a packageManager field.
       - uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
