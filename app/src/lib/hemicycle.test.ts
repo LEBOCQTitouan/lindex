@@ -4,18 +4,18 @@ import type { GroupTally } from "./read-model";
 
 // Scrutin 8433 breakdown — verbatim from mockups/data.js (hémicycle order L→R).
 const BD_8433: GroupTally[] = [
-  { group: "LFI", pour: 0, contre: 71, abst: 0, nv: 0 },
-  { group: "GDR", pour: 0, contre: 15, abst: 0, nv: 0 },
-  { group: "ECOS", pour: 0, contre: 36, abst: 0, nv: 0 },
-  { group: "SOC", pour: 0, contre: 56, abst: 1, nv: 0 },
-  { group: "LIOT", pour: 18, contre: 1, abst: 4, nv: 0 },
-  { group: "DEM", pour: 33, contre: 0, abst: 0, nv: 0 },
-  { group: "EPR", pour: 84, contre: 0, abst: 0, nv: 1 },
-  { group: "HOR", pour: 32, contre: 0, abst: 0, nv: 1 },
-  { group: "DR", pour: 46, contre: 0, abst: 1, nv: 0 },
-  { group: "UDR", pour: 17, contre: 0, abst: 0, nv: 0 },
-  { group: "RN", pour: 114, contre: 0, abst: 0, nv: 0 },
-  { group: "NI", pour: 7, contre: 0, abst: 1, nv: 0 },
+  { group: "LFI", pour: 0, contre: 71, abstention: 0, nonVotant: 0 },
+  { group: "GDR", pour: 0, contre: 15, abstention: 0, nonVotant: 0 },
+  { group: "ECOS", pour: 0, contre: 36, abstention: 0, nonVotant: 0 },
+  { group: "SOC", pour: 0, contre: 56, abstention: 1, nonVotant: 0 },
+  { group: "LIOT", pour: 18, contre: 1, abstention: 4, nonVotant: 0 },
+  { group: "DEM", pour: 33, contre: 0, abstention: 0, nonVotant: 0 },
+  { group: "EPR", pour: 84, contre: 0, abstention: 0, nonVotant: 1 },
+  { group: "HOR", pour: 32, contre: 0, abstention: 0, nonVotant: 1 },
+  { group: "DR", pour: 46, contre: 0, abstention: 1, nonVotant: 0 },
+  { group: "UDR", pour: 17, contre: 0, abstention: 0, nonVotant: 0 },
+  { group: "RN", pour: 114, contre: 0, abstention: 0, nonVotant: 0 },
+  { group: "NI", pour: 7, contre: 0, abstention: 1, nonVotant: 0 },
 ];
 
 describe("GROUPS_AN", () => {

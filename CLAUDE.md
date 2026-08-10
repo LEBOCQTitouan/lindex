@@ -39,15 +39,19 @@ env CARGO_INCREMENTAL=0 CARGO_TARGET_DIR=target/agent cargo <cmd> -p <crate>
 ```
 Scope with `-p <crate>`; wrap long commands in `timeout`; prefer `cargo nextest`.
 
-## AGENT PUSH RULES (the multi-workspace merge race)
-`main` is protected: PRs must be up-to-date (strict). To merge:
-1. `gh pr merge <PR#> --squash --delete-branch --auto`  (enrol once)
-2. `gh pr update-branch <PR#>`  whenever GitHub reports **BEHIND** (repeat if main keeps moving — `--auto` does NOT update-branch for you)
-3. GitHub auto-merges when CI is green **and** the branch is current.
+## MERGE RULES (private repo — no coordinator; lanes self-merge)
+No auto-merge / merge queue and no coordinator session: each lane merges its OWN PR
+when green, then emits the next tasks — fully autonomous.
+1. `just ci` (and app build for app lanes) must be green — this is the gate.
+2. `git fetch origin && git merge origin/main`; if anything changed, re-run `just ci`.
+3. `gh pr merge <PR#> --squash --delete-branch` (immediate, not `--auto`). If GitHub
+   rejects it as behind (another lane merged first), repeat 2–3 until it lands.
+4. Then emit the next tasks (`docs/handoff-protocol.md` §5).
+There is no branch protection, so green `just ci` + the requesting-code-review
+self-checklist IS the gate — never merge red, never skip the sync in step 2.
 
 Commit with an explicit identity to survive any corrupted worktree-local config:
 `git -c user.name="<you>" -c user.email="<you>" commit …`
-Never: merge red CI; self-merge without the review checklist.
 
 ## Class-A changes require an ADR (`docs/decisions/`)
 read-model / data-schema changes, public routes or API, DB migrations,

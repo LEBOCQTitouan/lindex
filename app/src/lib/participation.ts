@@ -23,7 +23,7 @@ export function participation(t: ScrutinTotals): Participation {
     members: t.membersTotal,
     absent,
     nonVotants: t.nonVotants,
-    exprimes: t.pour + t.contre,
+    exprimes: t.exprimes,
     pct: Math.round((t.votants / t.membersTotal) * 100),
   };
 }

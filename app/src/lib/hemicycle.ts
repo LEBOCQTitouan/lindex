@@ -81,17 +81,17 @@ export function buildSeats(
   const byId = new Map(breakdown.map((t) => [t.group, t]));
   const flat: { kind: string; color: string }[] = [];
   for (const g of GROUPS_AN) {
-    const t = byId.get(g.id) ?? { group: g.id, pour: 0, contre: 0, abst: 0, nv: 0 };
-    const absent = Math.max(0, g.members - t.pour - t.contre - t.abst - t.nv);
+    const t = byId.get(g.id) ?? { group: g.id, pour: 0, contre: 0, abstention: 0, nonVotant: 0 };
+    const absent = Math.max(0, g.members - t.pour - t.contre - t.abstention - t.nonVotant);
     const push = (kind: string, n: number) => {
       const color = mode === "groupes" ? g.color : (VOTE_COLOR[kind] ?? "#ffffff");
       for (let i = 0; i < n; i++) flat.push({ kind, color });
     };
     // Within a group: pour, abstention, contre, non-votant, absent.
     push("pour", t.pour);
-    push("abst", t.abst);
+    push("abst", t.abstention);
     push("contre", t.contre);
-    push("nv", t.nv);
+    push("nv", t.nonVotant);
     push("absent", absent);
   }
   const W = opts.width ?? 320;

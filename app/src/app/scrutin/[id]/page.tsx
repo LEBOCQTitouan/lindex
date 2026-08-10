@@ -93,7 +93,7 @@ export default async function ScrutinPage({
             <span className="stat__unit"> votant·es</span>
           </span>
           <span className="stat__base">
-            médiane du jour : {baselines.votants} · {part.pct} % des sièges
+            médiane du jour : {baselines.votants.median} · {part.pct} % des sièges
           </span>
         </span>
         <span className="part__gap">
@@ -106,7 +106,7 @@ export default async function ScrutinPage({
             {totals.abstention}
             <span className="stat__unit"> abstentions</span>
           </span>
-          <span className="stat__base">médiane du jour : {baselines.abstention}</span>
+          <span className="stat__base">médiane du jour : {baselines.abstention.median}</span>
         </span>
       </div>
 
@@ -143,18 +143,25 @@ export default async function ScrutinPage({
       </div>
 
       <div className="foot">
-        <a
-          className="prov"
-          href={provenance.url}
-          title={`${tier ? tier.label : provenance.tier} — ouvrir la source`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <span className="prov__dot">{tier ? tier.n : "?"}</span>
-          <span className="prov__label">
-            Scrutin n° {row.scrutinId} — {chamberShort(row.chamber)}
+        {/* Provenance: tier dot + source label; links out when a URL exists
+            (the contract allows a null url). */}
+        {provenance.url ? (
+          <a
+            className="prov"
+            href={provenance.url}
+            title={`${tier ? tier.label : provenance.tier} — ouvrir la source`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span className="prov__dot">{tier ? tier.n : "?"}</span>
+            <span className="prov__label">{provenance.label}</span>
+          </a>
+        ) : (
+          <span className="prov" title={tier ? tier.label : provenance.tier}>
+            <span className="prov__dot">{tier ? tier.n : "?"}</span>
+            <span className="prov__label">{provenance.label}</span>
           </span>
-        </a>
+        )}
         <span className="margeline">
           marge {marge >= 0 ? "+" : ""}
           {marge} · scrutin n° {row.scrutinId}

@@ -70,14 +70,14 @@ The **Next actions**, **Follow-ups**, and **Archive-ok** lines are mandatory.
 "Archive-ok: YES" is allowed only when your work is merged (or fully handed off)
 and nothing is pending, blocked, or running in the background.
 
-## 5. Emit the next tasks — the self-perpetuating chain
-So the human never has to work out what to start next, **every merged lane emits
-its follow-ups**. It is status-aware, so parallel agents don't emit redundant work.
-
-Run this as you merge (or when you open the PR, marking follow-ups queued):
+## 5. Emit the next tasks — the self-perpetuating chain (run by the LANE itself)
+No auto-merge and no coordinator: each lane self-merges (see CLAUDE.md → MERGE
+RULES), then runs this to hand the human the next tasks. It is status-aware, so
+parallel lanes never emit the same task twice:
 1. Read the status board on latest `main`: `git fetch origin`, then
    `git show origin/main:docs/roadmap.md`.
-2. Flip **your** lane's row to ✅ in your merge.
+2. Confirm your PR merged; flip your lane's board row to ✅ (part of your merge, or
+   a tiny follow-up commit to main).
 3. **READY** = every lane whose deps are *all* ✅ on the board.
 4. **AVAILABLE** = READY minus any lane that already has a branch
    (`git branch -a`, open PRs) or whose row is 🔵 / 🟣 / ✅ / 🟡-queued.
@@ -107,7 +107,10 @@ Next.js app plane app/, shared Postgres facts/app schemas).
    scores/rankings/verdicts; symmetry; French UI / English code; thiserror in libs, anyhow
    in bins; #![forbid(unsafe_code)]; no unwrap/expect/panic in library code.
 7) Gate: `just ci` (data plane) and/or `just app-lint app-build` (app plane) — local == CI.
-8) Commit: Conventional Commits (scope = crate/package, body = why). PR:
-   gh pr merge <PR#> --squash --delete-branch --auto, then gh pr update-branch <PR#> while BEHIND.
-9) Finish with the session-end report (§4) AND emit follow-ups (§5).
+8) Commit: Conventional Commits (scope = crate/package, body = why); update your row
+   on docs/roadmap.md. Open a PR, then SELF-MERGE when green: git fetch && git merge
+   origin/main, re-run the gate, then gh pr merge <#> --squash --delete-branch (retry
+   if another lane merged first). No --auto, no coordinator.
+9) Finish with the session-end report (§4) AND emit the follow-ups (§5) — the
+   paste-ready blocks for whatever your merge unblocked.
 ```

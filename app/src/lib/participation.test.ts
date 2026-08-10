@@ -10,6 +10,7 @@ const T_8433: ScrutinTotals = {
   nonVotants: 2,
   membersTotal: 577,
   votants: 537,
+  exprimes: 530,
 };
 
 describe("participation", () => {
@@ -33,6 +34,7 @@ describe("participation", () => {
       nonVotants: 0,
       membersTotal: 577,
       votants: 577,
+      exprimes: 577,
     };
     expect(participation(full).absent).toBe(0);
   });
