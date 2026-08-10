@@ -96,10 +96,24 @@ async fn run_reingest(args: &[String]) -> Result<()> {
         },
         alerter: alerter.as_ref(),
     };
-    let report = reingest
-        .run(chamber, from, to)
-        .await
-        .context("re-ingesting range")?;
+    let report = match reingest.run(chamber, from, to).await {
+        Ok(report) => report,
+        Err(e) => {
+            // Work-set discovery itself failed (e.g. the calendar query errored):
+            // still record the run and alert (both best-effort) so the failure is
+            // never silent, then propagate. If the DB is fully down these are
+            // no-ops, but a log alerter still surfaces it on stderr.
+            let target = format!("reingest:{}:{}..{}", chamber_code(chamber), from, to);
+            record_run(&pool, &target, &Err::<(), String>(e.to_string())).await;
+            let alert = IngestionAlert {
+                target,
+                failed: Vec::new(),
+                message: format!("re-ingest work-set discovery failed: {e}"),
+            };
+            let _ = alerter.alert(&alert).await;
+            return Err(anyhow::Error::new(e).context("re-ingesting range"));
+        }
+    };
 
     // One batch audit row per scheduled invocation (US-8.1).
     let agg: Result<(), String> = if report.failures.is_empty() {
@@ -136,6 +150,15 @@ fn choose_alerter() -> Box<dyn Alerter> {
     match std::env::var("LINDEX_ALERT_WEBHOOK") {
         Ok(url) if !url.is_empty() => Box::new(WebhookAlerter::new(url)),
         _ => Box::new(LogAlerter),
+    }
+}
+
+/// Stable chamber code for run targets (matches `application::ops` and the
+/// persistence encoding).
+fn chamber_code(chamber: Chamber) -> &'static str {
+    match chamber {
+        Chamber::AssembleeNationale => "AN",
+        Chamber::Senat => "SENAT",
     }
 }
 

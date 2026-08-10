@@ -11,6 +11,8 @@ Description=L'Index unattended re-ingest (%i)
 Documentation=file:/opt/lindex/docs/ops/ingestion-runbook.md
 After=network-online.target
 Wants=network-online.target
+# If Postgres runs on this host, order after it (ignored when it is remote).
+After=postgresql.service
 # Fallback notifier, in addition to the app-level Alerter (belt and braces).
 OnFailure=lindex-alert@%i.service
 
