@@ -1,0 +1,32 @@
+# Templated per-chamber re-ingest job (US-8.1). The instance name %i is the
+# chamber code: lindex-reingest@AN, lindex-reingest@SENAT.
+#
+# Install: copy this unit + the timer + lindex-alert@.service to
+# /etc/systemd/system/, put the `ingest` binary at /usr/local/bin/ingest and
+# lindex-reingest-window at /usr/local/bin/, create /etc/lindex/ingest.env, then
+#   systemctl enable --now lindex-reingest@AN.timer
+# See docs/ops/ingestion-runbook.md.
+[Unit]
+Description=L'Index unattended re-ingest (%i)
+Documentation=file:/opt/lindex/docs/ops/ingestion-runbook.md
+After=network-online.target
+Wants=network-online.target
+# If Postgres runs on this host, order after it (ignored when it is remote).
+After=postgresql.service
+# Fallback notifier, in addition to the app-level Alerter (belt and braces).
+OnFailure=lindex-alert@%i.service
+
+[Service]
+Type=oneshot
+# DATABASE_URL, LINDEX_ALERT_WEBHOOK, LINDEX_WINDOW_DAYS live here (chmod 600).
+EnvironmentFile=/etc/lindex/ingest.env
+ExecStart=/usr/local/bin/lindex-reingest-window %i
+# Least privilege: this job only needs network + the env file.
+User=lindex
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

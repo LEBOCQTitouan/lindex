@@ -1,0 +1,17 @@
+# Schedules lindex-reingest@%i.service (US-8.1). One timer per chamber:
+#   systemctl enable --now lindex-reingest@AN.timer
+[Unit]
+Description=Schedule L'Index unattended re-ingest (%i)
+
+[Timer]
+# Daily, early morning: re-parses recently-held scrutins and re-projects their
+# baselines before the day's readers arrive (it refreshes persisted rows, it does
+# not pull new scrutins — see the runbook). Persistent so a missed run (host down)
+# fires on next boot; jitter to avoid thundering herds.
+OnCalendar=*-*-* 06:30:00
+Persistent=true
+RandomizedDelaySec=300
+Unit=lindex-reingest@%i.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,17 @@
+# Fallback failure notifier fired by OnFailure= from lindex-reingest@%i.service.
+# The application already alerts via its Alerter port; this is defence in depth
+# so a crash *before* the app-level alert (e.g. the binary is missing) is still
+# surfaced. Posts a plain message to LINDEX_ALERT_WEBHOOK if set, else logs.
+[Unit]
+Description=L'Index ingest failure alert (%i)
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/lindex/ingest.env
+ExecStart=/bin/sh -c 'msg="L'\''Index ingest FAILED for chamber %i on $(hostname) at $(date -u +%%FT%%TZ)"; \
+  if [ -n "${LINDEX_ALERT_WEBHOOK:-}" ]; then \
+    curl -fsS -X POST -H "Content-Type: application/json" \
+      --data "{\"text\":\"$msg\"}" "$LINDEX_ALERT_WEBHOOK" || echo "$msg" >&2; \
+  else echo "$msg" >&2; fi'
+User=lindex
+NoNewPrivileges=true

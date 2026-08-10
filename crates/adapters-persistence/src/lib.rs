@@ -18,6 +18,8 @@ use lindex_domain::{
 use serde_json::{json, Value};
 use sqlx::{PgPool, Row};
 
+mod calendar;
+
 pub struct PgStore {
     pub pool: PgPool,
 }
@@ -28,11 +30,11 @@ impl PgStore {
     }
 }
 
-fn backend<E: std::fmt::Display>(e: E) -> RepoError {
+pub(crate) fn backend<E: std::fmt::Display>(e: E) -> RepoError {
     RepoError::Backend(e.to_string())
 }
 
-fn chamber_code(chamber: Chamber) -> &'static str {
+pub(crate) fn chamber_code(chamber: Chamber) -> &'static str {
     match chamber {
         Chamber::AssembleeNationale => "AN",
         Chamber::Senat => "SENAT",
