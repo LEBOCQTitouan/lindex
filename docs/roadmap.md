@@ -32,10 +32,10 @@ Tracks: `T1` Sources (Rust) · `T2` Domain+Projections (Rust) · `T3` App (Next.
 | Lane | Phase | Deps | US | Status | Unblocks |
 |---|---|---|---|---|---|
 | **L0-DATA** spine (data) | P0 | — | 3.1, 8.4, 7.2 | ⬜ | everything |
-| **L0-APP** spine (app, on fixtures) | P0 | schema shape | 3.1, 7.4 | 🔵 | all app lanes |
+| **L0-APP** spine (app, on fixtures) | P0 | schema shape | 3.1, 7.4 | ✅ | all app lanes |
 | L1-DIGEST | P1 | L0 | 1.1,1.2,1.3,1.5 | ⬜ | — |
 | L1-SCRUTIN full | P1 | L0 | 3.1, 3.6 | ⬜ | L2-JUSTIF |
-| L1-METHODO | P1 | L0-APP | 7.1,7.2,7.4 | ⬜ | — |
+| L1-METHODO | P1 | L0-APP | 7.1,7.2,7.4 | 🟡 | — |
 | L1-OPS | P1 | L0-DATA | 8.1, 8.4 | ⬜ | L2-OPS+ |
 | L1-SENAT source | P1 | WI-0.1 | 1.1 (both chambers) | ⬜ | Sénat slices |
 | L2-DOSSIER | P2 | L0 | 2.1,2.2,2.3 | ⬜ | L3-ALERTS, L3-SUMMARY |
@@ -45,7 +45,7 @@ Tracks: `T1` Sources (Rust) · `T2` Domain+Projections (Rust) · `T3` App (Next.
 | L2-SEARCH | P2 | L0 (data) | 6.1 | ⬜ | L3-SAVEDSEARCH |
 | L2-DIGEST+ | P2 | L1-DIGEST | 1.4, 1.6 | ⬜ | — |
 | L2-OPS+ | P2 | L1-OPS | 8.2, 8.3 | ⬜ | — |
-| **L3-AUTH** (hub) | P3 | L0-APP | — | ⬜ | L3-ALERTS, L3-COHERENCE, L3-SAVEDSEARCH |
+| **L3-AUTH** (hub) | P3 | L0-APP | — | 🟡 | L3-ALERTS, L3-COHERENCE, L3-SAVEDSEARCH |
 | L3-SUJET | P3 | L0, Légifrance src | 2.6 | ⬜ | L4-GRAPH |
 | L3-ALERTS subscribe | P3 | L2-DOSSIER, L3-AUTH | 2.4 | ⬜ | — |
 | L3-SUMMARY plain-lang | P3 | L2-DOSSIER | 2.5 | ⬜ | — |
