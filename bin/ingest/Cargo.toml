@@ -3,6 +3,7 @@ name = "ingest"
 version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
+publish = false
 
 # Composition root: the only place adapters meet ports.
 [dependencies]
